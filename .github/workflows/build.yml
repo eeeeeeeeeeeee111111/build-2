@@ -15,10 +15,9 @@ jobs:
           components: rust-src
           
       - name: Build project
-        # เพิ่ม RUSTFLAGSเพื่อให้มันยอมรับ Warning และคอมไพล์จนจบ
-        run: |
-          export RUSTFLAGS="-A warnings"
-          cargo build --release --target x86_64-unknown-uefi -Z build-std=core,alloc
+        env:
+          RUSTFLAGS: "-A warnings"
+        run: cargo build --release --target x86_64-unknown-uefi -Z build-std=core,alloc
         
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
