@@ -15,15 +15,13 @@ jobs:
           components: rust-src
           
       - name: Build project
-        # ใช้คำสั่ง build แบบระบุรายละเอียดครบในบรรทัดเดียว และปิดออปชันที่อาจทำให้เกิดบั๊ก
         run: |
-          cargo build --release \
-            --target x86_64-unknown-uefi \
-            -Z build-std=core,alloc \
-            --config "build.rustflags=['-A', 'warnings']"
+          # บังคับให้ใช้ Target UEFI และห้ามใช้ Library ของ Linux
+          cargo build --release --target x86_64-unknown-uefi -Z build-std=core,alloc --config "build.rustflags=['-A', 'warnings']"
         
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
           name: valthrun-efi-result
+          # ระบุตำแหน่งไฟล์ .efi ให้ชัดเจน
           path: target/x86_64-unknown-uefi/release/*.efi
