@@ -15,7 +15,12 @@ jobs:
           components: rust-src
           
       - name: Build project
-        run: cargo build --release
+        # ใช้คำสั่ง build แบบระบุรายละเอียดครบในบรรทัดเดียว และปิดออปชันที่อาจทำให้เกิดบั๊ก
+        run: |
+          cargo build --release \
+            --target x86_64-unknown-uefi \
+            -Z build-std=core,alloc \
+            --config "build.rustflags=['-A', 'warnings']"
         
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
