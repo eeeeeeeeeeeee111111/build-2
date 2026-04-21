@@ -1,4 +1,4 @@
-name: Build
+name: Emergency Build
 on: [push, workflow_dispatch]
 
 jobs:
@@ -6,20 +6,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Install Rust
+
+      - name: Setup Rust (Stable Nightly)
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: nightly-2024-11-01
+          # ถอยกลับไปใช้เวอร์ชันเดือน 8 ที่พิสูจน์แล้วว่าไม่มีบั๊กเรื่อง --print=file-names
+          toolchain: nightly-2024-08-01
           targets: x86_64-unknown-uefi
           components: rust-src
-          
-      - name: Cargo Build
-        # รันแค่ cargo build เพียวๆ เลยครับ มันจะไปอ่าน config.toml เอง
-        run: cargo build --release
-        
-      - name: Upload
+
+      - name: Hard Reset & Build
+        run: |
+          # บังคับลบ Cache เก่าทิ้งให้หมด
+          cargo clean
+          # ใช้ RUSTC_BOOTSTRAP เพื่อปลดล็อกฟีเจอร์พิเศษ
+          export RUSTC_BOOTSTRAP=1
+          # รัน build โดยตรง ไม่ผ่าน config.toml เพื่อลดจุดผิดพลาด
+          cargo build --release --target x86_64-unknown-uefi -Z build-std=core,alloc
+        env:
+          RUSTFLAGS: "-A warnings"
+
+      - name: Final Result
         uses: actions/upload-artifact@v4
         with:
-          name: result-efi
+          name: Valthrun-EFI-Success
           path: target/x86_64-unknown-uefi/release/*.efi
